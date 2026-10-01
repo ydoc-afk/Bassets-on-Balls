@@ -35,6 +35,14 @@ public partial class Lobby : Control
         if (Engine.IsEditorHint())
             return;
         
+        var iconMaterial = new ShaderMaterial { Shader = GD.Load<Shader>("res://Shaders/rounded_texture.gdshader") };
+        iconMaterial.SetShaderParameter("radius", 26.0f);
+        LobbyMainButton.Material = iconMaterial;
+        void FitIcon() => iconMaterial.SetShaderParameter("rect_size", LobbyMainButton.Size - new Vector2(28f, 28f));
+        LobbyMainButton.Resized += FitIcon;
+        FitIcon();
+        CardMotion.Attach(LobbyMainButton, LobbyMainButton, LobbyMainButton.GetNodeOrNull<GlassPanel>("Glass"));
+
         LobbyMainButton.Pressed += OpenLobbySubMenu;
         LobbyMainButton.FocusEntered += () => LobbyMenu?.Hide();
 

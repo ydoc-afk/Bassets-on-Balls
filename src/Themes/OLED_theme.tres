@@ -40,6 +40,73 @@ font_names = PackedStringArray("Fantasy")
 
 [sub_resource type="StyleBoxEmpty" id="bb_empty"]
 
+[sub_resource type="StyleBoxFlat" id="bb_popup"]
+bg_color = Color(0.1, 0.12, 0.26, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.3)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+corner_detail = 12
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 36
+content_margin_left = 20.0
+content_margin_top = 16.0
+content_margin_right = 20.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="bb_input"]
+bg_color = Color(1, 1, 1, 0.10)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.22)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+corner_detail = 10
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id="bb_input_focus"]
+bg_color = Color(1, 1, 1, 0.14)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.85)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+corner_detail = 10
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id="bb_bar_bg"]
+bg_color = Color(1, 1, 1, 0.14)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="bb_bar_fill"]
+bg_color = Color(1, 1, 1, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [sub_resource type="StyleBoxEmpty" id="bb_profile"]
 content_margin_left = 14.0
 content_margin_top = 14.0
@@ -208,8 +275,17 @@ NavButtons/styles/focus = SubResource("bb_nav_focus")
 NavButtons/styles/hover = SubResource("bb_nav_hover")
 NavButtons/styles/normal = SubResource("StyleBoxEmpty_f7dxq")
 NavButtons/styles/pressed = SubResource("bb_nav_hover")
-Panel/styles/panel = SubResource("StyleBoxFlat_f7dxq")
+Panel/styles/panel = SubResource("bb_empty")
 PanelContainer/styles/panel = SubResource("bb_panel")
 PopupWindowContainer/base_type = &"PanelContainer"
-PopupWindowContainer/styles/panel = SubResource("StyleBoxFlat_ss67d")
-ProgressBar/styles/fill = SubResource("StyleBoxFlat_tte3r")
+GlassMenuPanel/base_type = &"Panel"
+GlassMenuPanel/styles/panel = SubResource("bb_popup")
+PopupWindowContainer/styles/panel = SubResource("bb_popup")
+Label/colors/font_shadow_color = Color(0, 0, 0, 0.55)
+Label/constants/shadow_offset_y = 2
+LineEdit/colors/font_color = Color(1, 1, 1, 1)
+LineEdit/styles/focus = SubResource("bb_input_focus")
+LineEdit/styles/normal = SubResource("bb_input")
+LineEdit/styles/read_only = SubResource("bb_input")
+ProgressBar/styles/background = SubResource("bb_bar_bg")
+ProgressBar/styles/fill = SubResource("bb_bar_fill")

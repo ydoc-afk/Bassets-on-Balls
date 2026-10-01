@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ba5e67ap55vwb" path="res://Scenes/Main/Body/Lobby/LobbiesContainer.cs" id="1_4f5y8"]
 
+[ext_resource type="Script" path="res://Misc/GlassContainer.cs" id="bb_glass"]
 [node name="LobbiesContainer" type="VBoxContainer"]
 anchors_preset = 10
 anchor_right = 1.0
@@ -14,6 +15,11 @@ script = ExtResource("1_4f5y8")
 [node name="LobbiesHeader" type="PanelContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 0
+script = ExtResource("bb_glass")
+Radius = 26.0
+Inset = 10.0
+Blur = 2.4
+Refraction = 12.0
 
 [node name="MarginContainer" type="MarginContainer" parent="LobbiesHeader"]
 layout_mode = 2

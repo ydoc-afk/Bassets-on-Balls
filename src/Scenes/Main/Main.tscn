@@ -273,11 +273,14 @@ metadata/_custom_type_script = "uid://bj71nhnsgexja"
 
 [node name="PopupViewportContainer" type="SubViewportContainer" parent="."]
 visible = false
-layout_mode = 0
-offset_top = 38.0
-offset_right = 1280.0
-offset_bottom = 681.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_vertical = 3
+stretch = true
 script = ExtResource("15_hcu3t")
 
 [node name="TopLayer" type="SubViewport" parent="PopupViewportContainer"]
@@ -293,7 +296,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.75)
+color = Color(0.02, 0.03, 0.1, 0.6)
 
 [node name="SoundEffects" type="Node" parent="."]
 script = ExtResource("10_ykwdk")

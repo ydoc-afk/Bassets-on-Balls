@@ -76,7 +76,11 @@ class Handler(BaseHTTPRequestHandler):
         elif p == "/apps":
             self._send(200, {"success": True, "apps": apps()})
         elif p == "/lobbies":
-            self._send(200, {"success": True, "lobbies": []})
+            self._send(200, {"success": True, "lobbies": [{
+                "id": "lobby1", "name": "Steam co-op", "icon_png_path": "mock/0.png", "profile_id": "p1",
+                "started_by_profile_id": "p2", "pin_required": False, "multi_user": True,
+                "stop_when_everyone_leaves": True, "connected_sessions": ["a", "b"],
+                "runner": {"type": "docker", "name": "Steam", "image": "ghcr.io/games-on-whales/steam:edge"}}]})
         elif p == "/clients":
             self._send(200, {"success": True, "clients": []})
         elif p == "/docker/images/inspect":

@@ -38,6 +38,16 @@ public static class CardMotion
 		trigger.ButtonUp += Settle;
 	}
 
+	public static void PopIn(Control panel)
+	{
+		panel.Modulate = new Color(1f, 1f, 1f, 0f);
+		panel.Scale = new Vector2(0.92f, 0.92f);
+		panel.Resized += () => panel.PivotOffset = panel.Size / 2f;
+		var tween = panel.CreateTween().SetParallel().SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+		tween.TweenProperty(panel, "modulate:a", 1f, 0.2);
+		tween.TweenProperty(panel, "scale", Vector2.One, 0.3);
+	}
+
 	public static void FadeIn(CanvasItem item, int index)
 	{
 		item.Modulate = new Color(1f, 1f, 1f, 0f);

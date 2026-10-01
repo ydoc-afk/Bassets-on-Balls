@@ -46,6 +46,10 @@ public partial class Main : Control
 
 		WolfApi.Init();
 
+		Effects.Apply();
+		AddChild(new EffectsGovernor());
+		_ = Effects.ConsiderStreamAsync();
+
 		SelfUpdateAsync();
 
 		Logger.LogInformation("This session's id: {0}", WolfApi.SessionId);

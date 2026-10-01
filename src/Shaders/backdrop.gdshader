@@ -8,7 +8,7 @@ uniform vec4 colour_a : source_color = vec4(0.16, 0.30, 0.85, 1.0);
 uniform vec4 colour_b : source_color = vec4(0.55, 0.20, 0.80, 1.0);
 uniform vec4 colour_c : source_color = vec4(0.05, 0.65, 0.65, 1.0);
 uniform float speed = 0.06;
-uniform float animated = 1.0;
+uniform float time = 0.0; // fed from Backdrop.cs; reading TIME here would stop the UI from ever idling
 
 float blob(vec2 p, vec2 centre, float radius) {
 	float d = length(p - centre) / radius;
@@ -20,7 +20,7 @@ float hash(vec2 p) {
 }
 
 void fragment() {
-	float t = TIME * speed * animated;
+	float t = time * speed;
 	float aspect = rect_size.x / rect_size.y;
 	vec2 p = vec2(UV.x * aspect, UV.y);
 

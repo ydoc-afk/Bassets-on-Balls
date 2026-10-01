@@ -8,10 +8,36 @@ namespace WolfUI;
 // saves a screenshot after the given delay and quits.
 public static class Preview
 {
+	// BASSETS_STATS=1 prints frames drawn and GPU time per second.
+	private static void LogStats(Main main)
+	{
+		var rid = main.GetViewport().GetViewportRid();
+		var renders = 0;
+		var lastRenders = 0;
+		RenderingServer.FramePostDraw += () => renders++;
+		RenderingServer.ViewportSetMeasureRenderTime(rid, true);
+		var lastFrames = Engine.GetFramesDrawn();
+		var lastProcess = Engine.GetProcessFrames();
+		var timer = new Timer { WaitTime = 1.0, Autostart = true };
+		timer.Timeout += () =>
+		{
+			var frames = Engine.GetFramesDrawn();
+			var process = Engine.GetProcessFrames();
+			GD.Print($"STATS process/s={process - lastProcess} drawn/s={frames - lastFrames} rendered/s={renders - lastRenders} gpu_ms={RenderingServer.ViewportGetMeasuredRenderTimeGpu(rid):0.00} cpu_ms={RenderingServer.ViewportGetMeasuredRenderTimeCpu(rid):0.00}");
+			lastFrames = frames;
+			lastProcess = process;
+			lastRenders = renders;
+		};
+		main.AddChild(timer);
+	}
+
 	public static void Run(Main main)
 	{
 		var path = System.Environment.GetEnvironmentVariable("BASSETS_SHOT");
 		if (string.IsNullOrEmpty(path)) return;
+
+		if (System.Environment.GetEnvironmentVariable("BASSETS_STATS") == "1")
+			LogStats(main);
 
 		var screen = System.Environment.GetEnvironmentVariable("BASSETS_SCREEN") ?? "users";
 		var delay = double.TryParse(System.Environment.GetEnvironmentVariable("BASSETS_SHOT_DELAY"), out var d) ? d : 3.0;
@@ -43,10 +69,20 @@ public static class Preview
 			}
 		};
 
+		if (System.Environment.GetEnvironmentVariable("BASSETS_SHOT_LATE") == "1")
+		{
+			tree.CreateTimer(delay + 5).Timeout += () =>
+			{
+				main.GetViewport().GetTexture().GetImage().SavePng(path.Replace(".png", "-late.png"));
+				tree.Quit();
+			};
+		}
+
 		tree.CreateTimer(delay).Timeout += () =>
 		{
 			main.GetViewport().GetTexture().GetImage().SavePng(path);
-			tree.Quit();
+			if (System.Environment.GetEnvironmentVariable("BASSETS_SHOT_LATE") != "1")
+				tree.Quit();
 		};
 	}
 }

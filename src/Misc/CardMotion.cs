@@ -50,6 +50,7 @@ public static class CardMotion
 
 	public static void FadeIn(CanvasItem item, int index)
 	{
+		if (!Effects.IsFull) return;
 		item.Modulate = new Color(1f, 1f, 1f, 0f);
 		var tween = item.CreateTween();
 		tween.TweenInterval(0.035 * index);

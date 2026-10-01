@@ -81,6 +81,11 @@ class Handler(BaseHTTPRequestHandler):
                 "started_by_profile_id": "p2", "pin_required": False, "multi_user": True,
                 "stop_when_everyone_leaves": True, "connected_sessions": ["a", "b"],
                 "runner": {"type": "docker", "name": "Steam", "image": "ghcr.io/games-on-whales/steam:edge"}}]})
+        elif p == "/sessions":
+            self._send(200, {"success": True, "sessions": [{
+                "app_id": "0", "client_id": "123456789", "client_ip": "127.0.0.1", "video_width": 1920,
+                "video_height": 1080, "video_refresh_rate": int(os.environ.get("MOCK_REFRESH", "60")),
+                "audio_channel_count": 2, "client_settings": {}}]})
         elif p == "/clients":
             self._send(200, {"success": True, "clients": []})
         elif p == "/docker/images/inspect":

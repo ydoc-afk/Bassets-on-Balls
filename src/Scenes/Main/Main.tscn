@@ -1,6 +1,8 @@
 [gd_scene load_steps=22 format=3 uid="uid://cj111e8qqvul4"]
 
 [ext_resource type="Script" uid="uid://duwpj7xjak0bd" path="res://Scenes/Main/Main.cs" id="1_xobeq"]
+[ext_resource type="Script" path="res://Misc/Backdrop.cs" id="bb_backdrop"]
+[ext_resource type="Script" path="res://Misc/GlassContainer.cs" id="bb_glass"]
 [ext_resource type="Resource" uid="uid://badu7abuxt6we" path="res://Resources/Controller/ControllerMap.tres" id="4_hkvnm"]
 [ext_resource type="Texture2D" uid="uid://dn0pykgwnubwt" path="res://Icons/UI/backward-fill-svgrepo-com.svg" id="4_xggvw"]
 [ext_resource type="Texture2D" uid="uid://b20xk3rj6tqt0" path="res://Icons/UI/multiplication-circle-svgrepo-com.svg" id="6_xggvw"]
@@ -32,7 +34,7 @@ grow_vertical = 2
 script = ExtResource("1_xobeq")
 controllerMap = ExtResource("4_hkvnm")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Panel" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,6 +43,8 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 2
+script = ExtResource("bb_backdrop")
 
 [node name="Content" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -54,6 +58,11 @@ theme_override_constants/separation = 0
 [node name="Header" type="PanelContainer" parent="Content"]
 layout_mode = 2
 size_flags_vertical = 4
+script = ExtResource("bb_glass")
+Radius = 30.0
+Inset = 14.0
+Blur = 2.4
+Refraction = 14.0
 
 [node name="MarginContainer" type="MarginContainer" parent="Content/Header"]
 layout_mode = 2
@@ -128,6 +137,11 @@ SwitchSzene = null
 
 [node name="Footer" type="PanelContainer" parent="Content"]
 layout_mode = 2
+script = ExtResource("bb_glass")
+Radius = 30.0
+Inset = 14.0
+Blur = 2.4
+Refraction = 14.0
 
 [node name="MarginContainer" type="MarginContainer" parent="Content/Footer"]
 layout_mode = 2

@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://jm7amjpwndkb" path="res://Icons/default_profile_icon.png" id="1_3fp83"]
 [ext_resource type="Script" uid="uid://co6uuhwci2mbc" path="res://Scenes/Main/Body/Users/Profile.cs" id="2_0h5hp"]
+[ext_resource type="Script" path="res://Misc/GlassPanel.cs" id="bb_glasspanel"]
 
 [node name="Profile" type="Button"]
 custom_minimum_size = Vector2(270, 360)
@@ -14,10 +15,26 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 6
 size_flags_vertical = 6
+theme_type_variation = &"ProfileCard"
 icon = ExtResource("1_3fp83")
 expand_icon = true
 script = ExtResource("2_0h5hp")
 metadata/_edit_use_anchors_ = true
+
+[node name="Glass" type="Control" parent="."]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("bb_glasspanel")
+Radius = 36.0
+Blur = 2.2
+Refraction = 20.0
+Bevel = 26.0
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1

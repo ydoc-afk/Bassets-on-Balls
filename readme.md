@@ -23,3 +23,15 @@ if set to `True` then Wolf-UI will ask for a pull of the latest Wolf-UI image on
 ---
 ### Special thanks to: 
 - [THOSE AWESOME GUYS](https://thoseawesomeguys.com/) for their awsome [icon pack](https://thoseawesomeguys.com/prompts/)
+
+---
+### Developing without a Heeler server
+`scripts/mock_api.py` fakes Heeler's control API so the UI can be run and tweaked on its own:
+
+```bash
+python3 scripts/mock_api.py /tmp/heeler-mock.sock &
+WOLF_SOCKET_PATH=/tmp/heeler-mock.sock Godot --path src
+```
+
+`BASSETS_SHOT=/tmp/shot.png BASSETS_SCREEN=apps` (or `users`) saves a screenshot of that screen and quits, which is handy
+for checking different window sizes: `Godot --path src --resolution 1080x2340`.

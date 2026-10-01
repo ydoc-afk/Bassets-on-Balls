@@ -49,6 +49,8 @@ public partial class Main : Control
 		SelfUpdateAsync();
 
 		Logger.LogInformation("This session's id: {0}", WolfApi.SessionId);
+
+		Preview.Run(this);
 	} 
 	
 	/*

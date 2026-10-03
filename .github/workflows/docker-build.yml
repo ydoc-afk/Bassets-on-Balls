@@ -2,6 +2,13 @@ name: Docker build
 
 on:
   push:
+    branches: [main]
+    tags: ["v*"]
+  # Check that the image still builds (nothing is pushed for PRs)
+  pull_request:
+
+permissions:
+  packages: write
 
 jobs:
   buildx:
@@ -12,39 +19,18 @@ jobs:
 
       # Set derived configuration variables:
       # - images: images to build (docker and/or github)
-      # - push: if images need to be uploaded to repository (when secrets available)
-      # - has_docker_token
-      # - has_github_token
+      # - push: if images need to be uploaded to repository (not for PRs)
       # - cache_from: image tag to use for imported cache
       # - cache_to: image tag to use for exported cache
       # - github_server_url: reference to source code repository
       - name: Prepare
         id: prep
         run: |
-          IMAGES=""
-          PUSH=false
-          if [ -n "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
-            IMAGES="gameonwhales/wolf-ui"
-            PUSH=true
-            echo "has_docker_token=true" >> $GITHUB_OUTPUT
-          fi
-          if [ -n "${{ secrets.GHCR_TOKEN }}" ]; then
-            REGISTRY_IMAGE="ghcr.io/${{ github.repository_owner }}/wolf-ui"
-            if [ "$IMAGES" = "" ]; then
-              IMAGES="ghcr.io/${REGISTRY_IMAGE}"
-            else
-              IMAGES="$IMAGES,ghcr.io/${REGISTRY_IMAGE}"
-            fi
-            PUSH=true
-            echo "has_github_token=true" >> $GITHUB_OUTPUT
-            echo "cache_from=type=registry,ref=${REGISTRY_IMAGE}:buildcache" >> $GITHUB_OUTPUT
-            echo "cache_to=type=registry,ref=${REGISTRY_IMAGE}:buildcache,mode=max" >> $GITHUB_OUTPUT
-          else
-            echo "cache_from=type=registry,ref=${REGISTRY_IMAGE}:buildcache" >> $GITHUB_OUTPUT
-            echo "cache_to=" >> $GITHUB_OUTPUT
-          fi
-          echo "images=${IMAGES}" >> $GITHUB_OUTPUT
-          echo "push=${PUSH}" >> $GITHUB_OUTPUT
+          REGISTRY_IMAGE="ghcr.io/${{ github.repository_owner }}/wolf-ui"
+          echo "images=${REGISTRY_IMAGE}" >> $GITHUB_OUTPUT
+          echo "push=${{ github.event_name != 'pull_request' }}" >> $GITHUB_OUTPUT
+          echo "cache_from=type=registry,ref=${REGISTRY_IMAGE}:buildcache" >> $GITHUB_OUTPUT
+          echo "cache_to=type=registry,ref=${REGISTRY_IMAGE}:buildcache,mode=max" >> $GITHUB_OUTPUT
           echo "github_server_url=${GITHUB_SERVER_URL}" >> $GITHUB_OUTPUT
 
       - name: Docker meta
@@ -57,7 +43,10 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}
-            type=edge,branch=master
+            # Calendar versions like v2026.10.0 aren't valid semver (leading zero), tag them as-is too
+            type=ref,event=tag
+            type=match,pattern=v(.*),group=1
+            type=edge,branch=main
             type=ref,event=branch
             type=raw,value=alpha
             type=sha
@@ -70,21 +59,13 @@ jobs:
           version: latest
           driver-opts: image=moby/buildkit:master
 
-      - name: Login to DockerHub
-        if: steps.prep.outputs.has_docker_token != '' # secrets not available in PRs
-        uses: docker/login-action@v2
-        with:
-          username: abeltramo
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-
       - name: Login to GitHub Container Registry
-        if: steps.prep.outputs.has_github_token != '' # secrets not available in PRs
+        if: steps.prep.outputs.push == 'true'
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          password: ${{ secrets.GHCR_TOKEN || github.token }}
 
       - name: Build Wolf UI
         uses: docker/build-push-action@v3
@@ -96,4 +77,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: ${{ steps.prep.outputs.cache_from }}
-          cache-to: ${{ steps.prep.outputs.cache_to }}
+          cache-to: ${{ steps.prep.outputs.push == 'true' && steps.prep.outputs.cache_to || '' }}

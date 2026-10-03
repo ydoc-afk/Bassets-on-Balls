@@ -78,6 +78,7 @@ public partial class App : MarginContainer, IRestorable<App>
 		//DownloadIcon.Hide();
 		//AppProgress.Hide();
 		AppButton.Pressed += OnPressed;
+		CardMotion.Attach(this, AppButton, GetNodeOrNull<GlassPanel>("HBoxContainer/AppButton/Panel"));
 
 		FocusEntered += AppMenu.Hide;
 		MenuButtonCancle.Pressed += AppButton.GrabFocus; //Hides menu via the FocusEntered above

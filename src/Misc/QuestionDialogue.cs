@@ -101,6 +101,9 @@ public partial class QuestionDialogue : CenterContainer
 
     public override void _Ready()
     {
+        if (!Engine.IsEditorHint() && GetChildCount() > 0 && GetChild(0) is Control panel)
+            CardMotion.PopIn(panel);
+
         if (Engine.IsEditorHint())
         {
             TitleLabel.Text = "QuestionDialogue";

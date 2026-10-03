@@ -1,6 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://b8hqqrgs44qe1"]
 
 [ext_resource type="Script" uid="uid://btyr21nbgvoog" path="res://Scenes/Main/Body/Lobby/Lobby.cs" id="1_3xjn5"]
+[ext_resource type="Script" path="res://Misc/GlassPanel.cs" id="bb_glasspanel"]
 [ext_resource type="Texture2D" uid="uid://cgbtl2q1omo44" path="res://Icons/UI/group-of-people-svgrepo-com.svg" id="3_vfn8t"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3xjn5"]
@@ -30,8 +31,24 @@ grow_vertical = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 240)
 layout_mode = 2
+theme_type_variation = &"ProfileCard"
 icon_alignment = 1
 expand_icon = true
+
+[node name="Glass" type="Control" parent="MarginContainer/LobbyMainButton"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("bb_glasspanel")
+Radius = 36.0
+Blur = 2.2
+Refraction = 20.0
+Bevel = 26.0
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/LobbyMainButton"]
 layout_mode = 1
@@ -50,7 +67,6 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/outline_size = 3
 text = "Lobby"
 horizontal_alignment = 1
 
@@ -65,14 +81,12 @@ theme_override_styles/separator = SubResource("StyleBoxEmpty_3xjn5")
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 10
-theme_override_constants/outline_size = 3
 text = "Started by:"
 
 [node name="CreatorNameLabel" type="Label" parent="MarginContainer/LobbyMainButton/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/outline_size = 3
 text = "Creator"
 
 [node name="MarginContainer2" type="MarginContainer" parent="MarginContainer/LobbyMainButton"]
@@ -102,7 +116,6 @@ theme_override_constants/margin_right = -4
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
-theme_override_constants/outline_size = 2
 text = "0"
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/LobbyMainButton/MarginContainer2/HBoxContainer"]
@@ -128,6 +141,7 @@ grow_vertical = 2
 
 [node name="Panel" type="Panel" parent="LobbyMenu"]
 layout_mode = 2
+theme_type_variation = &"GlassMenuPanel"
 
 [node name="MarginContainer3" type="MarginContainer" parent="LobbyMenu"]
 layout_mode = 2

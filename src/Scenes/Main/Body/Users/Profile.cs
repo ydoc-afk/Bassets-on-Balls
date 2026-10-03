@@ -12,6 +12,7 @@ public partial class Profile : Button, IRestorable<Profile>
 {
     [Signal]
     private delegate void EnteredViewEventHandler();
+    private const float IconInset = 14f; // matches ProfileCard in the theme
     private bool _wasInView = false;
     //public Profile profile;
     
@@ -40,7 +41,15 @@ public partial class Profile : Button, IRestorable<Profile>
             return;
         }
 
-        //Profile profileNode = Profile.New(profile);
+        var iconMaterial = new ShaderMaterial { Shader = GD.Load<Shader>("res://Shaders/rounded_texture.gdshader") };
+        iconMaterial.SetShaderParameter("radius", 26.0f);
+        Material = iconMaterial;
+        void FitIcon() => iconMaterial.SetShaderParameter("rect_size", Size - new Vector2(IconInset, IconInset) * 2f);
+        Resized += FitIcon;
+        FitIcon();
+
+        CardMotion.Attach(this, this, GetNodeOrNull<GlassPanel>("Glass"));
+
         Pressed += OnPressed;
         EnteredView += OnEnteredView;
     }

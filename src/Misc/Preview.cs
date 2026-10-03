@@ -73,13 +73,17 @@ public static class Preview
 		{
 			tree.CreateTimer(delay + 5).Timeout += () =>
 			{
+				RenderingServer.ForceDraw();
 				main.GetViewport().GetTexture().GetImage().SavePng(path.Replace(".png", "-late.png"));
 				tree.Quit();
 			};
 		}
 
+		// A window the compositor reports as hidden (e.g. behind other windows) stops drawing, which would leave the
+		// capture showing a stale frame, so render one now.
 		tree.CreateTimer(delay).Timeout += () =>
 		{
+			RenderingServer.ForceDraw();
 			main.GetViewport().GetTexture().GetImage().SavePng(path);
 			if (System.Environment.GetEnvironmentVariable("BASSETS_SHOT_LATE") != "1")
 				tree.Quit();

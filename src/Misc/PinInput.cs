@@ -67,6 +67,9 @@ public partial class PinInput : CenterContainer
         if (PinLineEdit == null)
             return;
 
+        if (GetChildCount() > 0 && GetChild(0) is Control panel)
+            CardMotion.PopIn(panel);
+
         PinLineEdit.GrabFocus();
 
         NumberButtons = [];

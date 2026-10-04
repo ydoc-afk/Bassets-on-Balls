@@ -29,6 +29,10 @@ public partial class AppList : Control
 			Main.Singleton.controllerMap.UsedControllerChanged += OnControllerChanged;
 		}
 
+		AppScrollContainer.ScrollDeadzone = 12;
+		AppScrollContainer.VerticalScrollMode = ScrollContainer.ScrollMode.ShowNever;
+		AppScrollContainer.Resized += ApplyLayout;
+
 		VisibilityChanged += RebuildAppList;
 		ThemeChanged += RebuildAppList;
 
@@ -65,7 +69,7 @@ public partial class AppList : Control
 			return;
 		}
 
-		AppGrid.Columns = AppGrid.GetThemeConstant("columns", "AppListGrid").Between(1, 6);
+		ApplyLayout();
 		Main.Singleton.BackHint.Visible = true;
 		await LoadAppList();
 
@@ -132,7 +136,10 @@ public partial class AppList : Control
 		{
 			vi.value.Name = $"App {vi.i}";
 			AddAppEntry(vi.value);
+			CardMotion.FadeIn(vi.value, vi.i);
 		}
+
+		ApplyLayout();
 		
 		var firstChildren = AppGrid.GetChildren()[..AppGrid.Columns].OfType<App>();
 		foreach(var child in firstChildren)
@@ -160,7 +167,7 @@ public partial class AppList : Control
 	private void EditorMockupReady()
 	{
 		
-		AppGrid.Columns = AppGrid.GetThemeConstant("columns", "AppListGrid").Between(1, 6);
+		ApplyLayout();
 		foreach (var child in AppGrid.GetChildren())
 			child.QueueFree();
 
@@ -172,6 +179,31 @@ public partial class AppList : Control
 				AppGrid.AddChild(scene.Instantiate());
 			}
 		}
+	}
+
+	private const float MinCardWidth = 250f;
+	private const float MaxCardWidth = 360f;
+	private const float CardGap = 28f;
+	private const float EdgeMargin = 28f;
+	private const float CardFrame = 24f;
+	private const float CardFooter = 76f;
+	private const float CellPadding = 28f; // the two spacers around each AppButton in App.tscn plus the HBox separation
+
+	// Fits as many columns as the width allows and sizes the cards to fill them, so the grid works from phones to 4K.
+	private void ApplyLayout()
+	{
+		var width = Mathf.Max(AppScrollContainer.Size.X - 2f * EdgeMargin, MinCardWidth);
+		var columns = Mathf.Clamp(Mathf.FloorToInt((width + CardGap) / (MinCardWidth + CellPadding + CardGap)), 1, 8);
+		var cellWidth = (width - CardGap * (columns - 1)) / columns;
+		var cardWidth = Mathf.Min(cellWidth - CellPadding, MaxCardWidth);
+		var cardHeight = (cardWidth - CardFrame) * 1.5f + CardFooter;
+
+		AppGrid.Columns = columns;
+		AppGrid.AddThemeConstantOverride("h_separation", (int)CardGap);
+		AppGrid.AddThemeConstantOverride("v_separation", (int)CardGap);
+
+		foreach (var app in AppGrid.GetChildren().OfType<App>())
+			app.AppButton.CustomMinimumSize = new Vector2(cardWidth, cardHeight);
 	}
 
 	private static Control BuildSpacer()

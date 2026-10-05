@@ -2,7 +2,7 @@ name: Docker build
 
 on:
   push:
-    branches: [main]
+    branches: [main, nightly]
     tags: ["v*"]
   # Check that the image still builds (nothing is pushed for PRs)
   pull_request:
@@ -29,8 +29,11 @@ jobs:
           REGISTRY_IMAGE="ghcr.io/${{ github.repository_owner }}/wolf-ui"
           echo "images=${REGISTRY_IMAGE}" >> $GITHUB_OUTPUT
           echo "push=${{ github.event_name != 'pull_request' }}" >> $GITHUB_OUTPUT
-          echo "cache_from=type=registry,ref=${REGISTRY_IMAGE}:buildcache" >> $GITHUB_OUTPUT
-          echo "cache_to=type=registry,ref=${REGISTRY_IMAGE}:buildcache,mode=max" >> $GITHUB_OUTPUT
+          # The nightly branch keeps its own cache so it doesn't evict main's
+          CACHE_TAG=buildcache
+          if [ "${{ github.ref }}" = "refs/heads/nightly" ]; then CACHE_TAG=buildcache-nightly; fi
+          echo "cache_from=type=registry,ref=${REGISTRY_IMAGE}:${CACHE_TAG}" >> $GITHUB_OUTPUT
+          echo "cache_to=type=registry,ref=${REGISTRY_IMAGE}:${CACHE_TAG},mode=max" >> $GITHUB_OUTPUT
           echo "github_server_url=${GITHUB_SERVER_URL}" >> $GITHUB_OUTPUT
 
       - name: Docker meta
@@ -48,7 +51,7 @@ jobs:
             type=match,pattern=v(.*),group=1
             type=edge,branch=main
             type=ref,event=branch
-            type=raw,value=alpha
+            type=raw,value=alpha,enable=${{ github.ref != 'refs/heads/nightly' }}
             type=sha
           flavor: latest=false # let's not produce a :latest tag
 

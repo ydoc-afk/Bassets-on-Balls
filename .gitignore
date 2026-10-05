@@ -324,3 +324,7 @@ platform/windows/godot_res.res
 # compile commands (https://clang.llvm.org/docs/JSONCompilationDatabase.html)
 compile_commands.json
 
+
+# Docker build directories for the app images (not VS build output)
+!apps/*/build/
+!apps/*/build/**

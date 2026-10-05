@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, nightly]
     tags: ["v*"]
-  # Check that the image still builds (nothing is pushed for PRs)
+  # Check that the images still build (nothing is pushed for PRs)
   pull_request:
 
 permissions:
@@ -13,6 +13,20 @@ permissions:
 jobs:
   buildx:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: wolf-ui
+            context: .
+            dockerfile: Dockerfile
+            build-args: ""
+          - name: kubuntu
+            context: apps/kubuntu/build
+            # buildx resolves --file relative to the working directory, not
+            # the build context, so this is the path from the repo root
+            dockerfile: apps/kubuntu/build/Dockerfile
+            build-args: "BASE_APP_IMAGE=ghcr.io/games-on-whales/base-app:edge"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,13 +40,20 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          REGISTRY_IMAGE="ghcr.io/${{ github.repository_owner }}/wolf-ui"
+          REGISTRY_IMAGE="ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}"
           echo "images=${REGISTRY_IMAGE}" >> $GITHUB_OUTPUT
           echo "push=${{ github.event_name != 'pull_request' }}" >> $GITHUB_OUTPUT
           # The nightly branch keeps its own cache so it doesn't evict main's
           CACHE_TAG=buildcache
           if [ "${{ github.ref }}" = "refs/heads/nightly" ]; then CACHE_TAG=buildcache-nightly; fi
-          echo "cache_from=type=registry,ref=${REGISTRY_IMAGE}:${CACHE_TAG}" >> $GITHUB_OUTPUT
+          # Only import the registry cache when we're pushing: for PRs the
+          # package may not exist on GHCR yet, and anonymous pulls of a
+          # missing package 403 and fail the build.
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "cache_from=type=registry,ref=${REGISTRY_IMAGE}:${CACHE_TAG}" >> $GITHUB_OUTPUT
+          else
+            echo "cache_from=" >> $GITHUB_OUTPUT
+          fi
           echo "cache_to=type=registry,ref=${REGISTRY_IMAGE}:${CACHE_TAG},mode=max" >> $GITHUB_OUTPUT
           echo "github_server_url=${GITHUB_SERVER_URL}" >> $GITHUB_OUTPUT
 
@@ -70,12 +91,13 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN || github.token }}
 
-      - name: Build Wolf UI
+      - name: Build ${{ matrix.name }}
         uses: docker/build-push-action@v3
         with:
           builder: ${{ steps.buildx.outputs.name }}
-          context: .
-          file: Dockerfile
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          build-args: ${{ matrix.build-args }}
           push: ${{ steps.prep.outputs.push }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

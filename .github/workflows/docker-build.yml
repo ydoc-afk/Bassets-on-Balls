@@ -27,6 +27,10 @@ jobs:
             # the build context, so this is the path from the repo root
             dockerfile: apps/kubuntu/build/Dockerfile
             build-args: "BASE_APP_IMAGE=ghcr.io/games-on-whales/base-app:edge"
+          - name: eden
+            context: apps/eden/build
+            dockerfile: apps/eden/build/Dockerfile
+            build-args: "BASE_APP_IMAGE=ghcr.io/games-on-whales/base-app:edge"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

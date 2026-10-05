@@ -44,7 +44,14 @@ jobs:
           # The nightly branch keeps its own cache so it doesn't evict main's
           CACHE_TAG=buildcache
           if [ "${{ github.ref }}" = "refs/heads/nightly" ]; then CACHE_TAG=buildcache-nightly; fi
-          echo "cache_from=type=registry,ref=${REGISTRY_IMAGE}:${CACHE_TAG}" >> $GITHUB_OUTPUT
+          # Only import the registry cache when we're pushing: for PRs the
+          # package may not exist on GHCR yet, and anonymous pulls of a
+          # missing package 403 and fail the build.
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "cache_from=type=registry,ref=${REGISTRY_IMAGE}:${CACHE_TAG}" >> $GITHUB_OUTPUT
+          else
+            echo "cache_from=" >> $GITHUB_OUTPUT
+          fi
           echo "cache_to=type=registry,ref=${REGISTRY_IMAGE}:${CACHE_TAG},mode=max" >> $GITHUB_OUTPUT
           echo "github_server_url=${GITHUB_SERVER_URL}" >> $GITHUB_OUTPUT
 

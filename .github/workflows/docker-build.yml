@@ -23,7 +23,9 @@ jobs:
             build-args: ""
           - name: kubuntu
             context: apps/kubuntu/build
-            dockerfile: Dockerfile
+            # buildx resolves --file relative to the working directory, not
+            # the build context, so this is the path from the repo root
+            dockerfile: apps/kubuntu/build/Dockerfile
             build-args: "BASE_APP_IMAGE=ghcr.io/games-on-whales/base-app:edge"
     steps:
       - name: Checkout

@@ -48,5 +48,11 @@ gow_log "[start] Starting Eden"
 # can't connect to :0 and the app crashes on launch, so force the Wayland platform plugin that the
 # AppImage bundles.
 export QT_QPA_PLATFORM=wayland
+
+# Also hand the NVIDIA Vulkan ICD to the loader directly when the container toolkit provided one
+# (additive: mesa ICDs for AMD/Intel hosts keep working).
+if [ -f /etc/vulkan/icd.d/nvidia_icd.json ]; then
+    export VK_ADD_DRIVER_FILES=/etc/vulkan/icd.d/nvidia_icd.json
+fi
 source /opt/gow/launch-comp.sh
 launcher /opt/eden/AppRun

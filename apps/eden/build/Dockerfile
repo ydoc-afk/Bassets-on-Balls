@@ -30,3 +30,4 @@ RUN set -eux; \
 RUN test -x /opt/eden/shared/bin/eden
 
 COPY --chmod=755 scripts/* /opt/gow/
+COPY --chmod=755 cont-init.d/ /etc/cont-init.d/

@@ -47,6 +47,9 @@ gow_log "[start] Starting Eden"
 # Heeler's compositor has no XWayland. Without this Qt prefers its xcb backend (DISPLAY is set),
 # can't connect to :0 and the app crashes on launch, so force the Wayland platform plugin that the
 # AppImage bundles.
+# The AppImage ships a hook (bin/wayland-is-broken.hook) that overrides the above with xcb and unsets
+# WAYLAND_DISPLAY unless this is set, which is what actually crashed Eden here.
+export I_WANT_A_BROKEN_WAYLAND_UI=1
 export QT_QPA_PLATFORM=wayland
 
 # Also hand the NVIDIA Vulkan ICD to the loader directly when the container toolkit provided one

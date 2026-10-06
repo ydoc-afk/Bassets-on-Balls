@@ -44,9 +44,9 @@ done
 
 gow_log "[start] Starting Eden"
 
-# Eden runs on the virtual display's Wayland by default (the AppImage bundles
-# the Qt wayland platform plugin). If Wayland misbehaves, force X11 through
-# the base image's patched Xwayland:
-#   export QT_QPA_PLATFORM=xcb
+# Heeler's compositor has no XWayland. Without this Qt prefers its xcb backend (DISPLAY is set),
+# can't connect to :0 and the app crashes on launch, so force the Wayland platform plugin that the
+# AppImage bundles.
+export QT_QPA_PLATFORM=wayland
 source /opt/gow/launch-comp.sh
 launcher /opt/eden/AppRun

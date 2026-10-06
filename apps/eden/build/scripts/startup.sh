@@ -57,5 +57,9 @@ export QT_QPA_PLATFORM=wayland
 if [ -f /etc/vulkan/icd.d/nvidia_icd.json ]; then
     export VK_ADD_DRIVER_FILES=/etc/vulkan/icd.d/nvidia_icd.json
 fi
+# Heeler's compositor has no window manager, so a plain client keeps whatever size it asks for and never fills the
+# stream. Run Eden inside Sway (like the other GoW desktop apps) so its window fills the screen. Override with
+# RUN_SWAY= in the app's env to launch it bare.
+export RUN_SWAY="${RUN_SWAY-1}"
 source /opt/gow/launch-comp.sh
 launcher /opt/eden/AppRun

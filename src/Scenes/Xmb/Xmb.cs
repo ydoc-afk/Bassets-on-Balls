@@ -51,6 +51,7 @@ public partial class Xmb : Control
 	private readonly List<Category> _cats = [];
 	private int _cat;
 	private float _u;
+	private int _runningCount;
 	private bool _narrow;
 	private bool _settled = true;
 
@@ -241,6 +242,9 @@ public partial class Xmb : Control
 	private async Task RefreshLobbies()
 	{
 		var lobbies = await WolfApi.GetLobbies();
+		_runningCount = lobbies.Count;
+		if (_cats[SettingsCat].Items.Count > 3)
+			ShowSettings();
 
 		foreach (var item in _cats[GamesCat].Items.Where(i => i.App is not null))
 		{
@@ -307,7 +311,7 @@ public partial class Xmb : Control
 			AppStatus.Ready => "Ready",
 			AppStatus.Missing => "Not downloaded yet · select to download",
 			AppStatus.Downloading => item.Progress >= 0 ? $"Downloading {item.Progress * 100:0}%" : "Downloading",
-			AppStatus.Running => "Running · select to return to it",
+			AppStatus.Running => "Running · select to return, open Options to close it",
 			_ => ""
 		};
 		if (item.View is null) return;
@@ -398,13 +402,33 @@ public partial class Xmb : Control
 			Toast("That lobby is full");
 	}
 
+	private static async Task<bool> ConfirmClose(string text) =>
+		await QuestionDialogue.OpenDialogue("Close", text, new Dictionary<string, bool> { { "Close", true }, { "Keep running", false } });
+
 	private async Task Stop(Item item)
 	{
 		if (item.Lobby?.Id is not { } id) return;
+		if (!await ConfirmClose($"Close {item.Title}? Unsaved progress is lost.")) return;
 		await WolfApi.StopLobby(id);
 		item.Lobby = null;
 		SetStatus(item, AppStatus.Ready);
-		Toast($"Stopped {item.Title}");
+		Toast($"Closed {item.Title}");
+	}
+
+	private async Task CloseAll()
+	{
+		var lobbies = await WolfApi.GetLobbies();
+		if (lobbies.Count == 0)
+		{
+			Toast("Nothing is running");
+			return;
+		}
+		if (!await ConfirmClose($"Close {lobbies.Count} running {(lobbies.Count == 1 ? "game" : "games")}? Unsaved progress is lost."))
+			return;
+		foreach (var lobby in lobbies.Where(l => l.Id is not null))
+			await WolfApi.StopLobby(lobby.Id!);
+		Toast("Closed everything that was running");
+		await RefreshLobbies();
 	}
 
 	private async Task JoinCoop(Item item)
@@ -450,6 +474,9 @@ public partial class Xmb : Control
 			return Task.CompletedTask;
 		};
 
+		var closeAll = new Item { Title = "Close running games", Glyph = XmbGlyph.Exit, Status = AppStatus.Ready };
+		closeAll.Activate = CloseAll;
+
 		var exit = new Item { Title = "Exit", Subtitle = "Close the launcher", Glyph = XmbGlyph.Exit, Status = AppStatus.Ready };
 		exit.Activate = () =>
 		{
@@ -460,7 +487,7 @@ public partial class Xmb : Control
 			return Task.CompletedTask;
 		};
 
-		SetItems(_cats[SettingsCat], [theme, sound, effects, exit]);
+		SetItems(_cats[SettingsCat], [theme, sound, effects, closeAll, exit]);
 		ShowSettings();
 	}
 
@@ -472,6 +499,12 @@ public partial class Xmb : Control
 		items[2].Subtitle = Effects.IsFull
 			? "Full: animated glass"
 			: "Reduced: still backdrop, lighter on the GPU and the stream";
+		items[3].Subtitle = _runningCount switch
+		{
+			0 => "Nothing is running",
+			1 => "1 game is running · select to close it",
+			_ => $"{_runningCount} games are running · select to close them"
+		};
 		RefreshItems(_cats[SettingsCat]);
 	}
 
@@ -875,7 +908,7 @@ public partial class Xmb : Control
 		{
 			case AppStatus.Running:
 				_optionItems.Add(("Return to game", () => Start(item)));
-				_optionItems.Add(("Stop", () => Stop(item)));
+				_optionItems.Add(("Close game", () => Stop(item)));
 				break;
 			case AppStatus.Missing:
 				_optionItems.Add(("Download", () => { Pull(item); return Task.CompletedTask; }));

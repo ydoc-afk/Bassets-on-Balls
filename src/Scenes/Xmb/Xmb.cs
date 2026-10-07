@@ -8,7 +8,7 @@ using Resources.WolfAPI;
 namespace WolfUI;
 
 // The cross-media-bar layout (WOLF_UI_LAYOUT=xmb): categories across, items down, the selected item enlarged where
-// the two meet. Everything is sized from one unit, U = min(width / 16, height / 9) (width / 11 on portrait screens),
+// the two meet. Everything is sized from one unit, U = min(width / 20, height / 11.25) (width / 11 on portrait screens),
 // so the same layout works from a phone to 4K and ultrawide.
 public partial class Xmb : Control
 {
@@ -526,7 +526,7 @@ public partial class Xmb : Control
 		if (w < 2 || h < 2) return;
 
 		_narrow = w / h < 0.8f;
-		_u = _narrow ? w / 11f : Mathf.Min(w / 16f, h / 9f);
+		_u = _narrow ? w / 11f : Mathf.Min(w / 20f, h / 11.25f);
 		var u = _u;
 		var selX = Mathf.Max(2.1f * u, w * (_narrow ? 0.2f : 0.16f));
 		var catY = h * (_narrow ? 0.24f : 0.25f);

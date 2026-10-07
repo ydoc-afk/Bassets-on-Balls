@@ -61,6 +61,16 @@ public static class Effects
 		Engine.MaxFps = full ? 60 : 30;
 	}
 
+	// A choice made in the UI: fixed from then on, like the env var
+	public static void Set(EffectsLevel level)
+	{
+		_forced = true;
+		if (_level == level) return;
+		_level = level;
+		Apply();
+		Changed?.Invoke();
+	}
+
 	// Only ever steps down, and only in auto mode, so a struggling session doesn't flip back and forth.
 	public static void StepDown(string reason)
 	{

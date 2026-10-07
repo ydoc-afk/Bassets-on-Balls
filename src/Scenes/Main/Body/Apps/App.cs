@@ -306,28 +306,6 @@ public partial class App : MarginContainer, IRestorable<App>
 		MenuButtonStart.GrabFocus();
 	}
 
-	private string? GetIconPath()
-	{
-		string icon;
-		if (IconPngPath is null)
-		{
-			if (Runner?.Image is null || !Runner.Image.Contains("ghcr.io/games-on-whales/"))
-				return null;
-
-			var name = Runner.Image.TrimPrefix("ghcr.io/games-on-whales/");
-			var idx = name.LastIndexOf(':');
-			if (idx >= 0)
-				name = name[..idx];
-
-			icon = $"https://games-on-whales.github.io/wildlife/apps/{name}/assets/icon.png";
-		}
-		else
-		{
-			icon = IconPngPath;
-		}
-		return icon;
-	}
-
 	private async void OnStartPressed()
 	{
 		//TODO: check if user already has a open singleplayer lobby for the chosen ap or folder and if yes re-join.
@@ -348,34 +326,9 @@ public partial class App : MarginContainer, IRestorable<App>
 		var lobbyId = lobby?.Id;
 		if (lobby == null)
 		{
-			var session = await WolfApi.GetSession();
-			if (session?.ClientSettings is null)
+			lobby = await AppLauncher.NewLobby(this, false);
+			if (lobby is null)
 				return;
-
-			lobby = new Resources.WolfAPI.Lobby
-			{
-				ProfileId = WolfApi.ActiveProfile.Id,
-				Name = Title,
-				MultiUser = false,
-				IconPngPath = GetIconPath(),
-				StopWhenEveryoneLeaves = false,
-				RunnerStateFolder = $"profile-data/{WolfApi.ActiveProfile.Id}/{Runner.Name}",
-				Runner = Runner,
-				VideoSettings = new VideoSettings
-				{
-					Width = session.VideoWidth,
-					Height = session.VideoHeight,
-					RefreshRate = session.VideoRefreshRate,
-					RunnerRenderNode = RenderNode,
-					WaylandRenderNode = RenderNode,
-					VideoProducerBufferCaps = System.Environment.GetEnvironmentVariable("WOLF_VIDEO_BUFFER_CAPS") ?? ""
-				},
-				AudioSettings = new AudioSettings
-				{
-					ChannelCount = session.AudioChannelCount
-				},
-				ClientSettings = session.ClientSettings
-			};
 			lobbyId = await WolfApi.CreateLobby(lobby);
 		}
 
@@ -427,34 +380,9 @@ public partial class App : MarginContainer, IRestorable<App>
 
 		MenuButtonCoop.Disabled = true;
 
-		var session = await WolfApi.GetSession();
-		if (session?.ClientSettings is null)
+		var lobby = await AppLauncher.NewLobby(this, true);
+		if (lobby is null)
 			return;
-
-		Resources.WolfAPI.Lobby lobby = new()
-		{
-			ProfileId = WolfApi.ActiveProfile.Id,
-			Name = Title,
-			MultiUser = true,
-			IconPngPath = GetIconPath(),
-			StopWhenEveryoneLeaves = false,
-			RunnerStateFolder = $"profile-data/{WolfApi.ActiveProfile.Id}/{Runner.Name}",
-			Runner = Runner,
-			VideoSettings = new VideoSettings
-			{
-				Width = session.VideoWidth,
-				Height = session.VideoHeight,
-				RefreshRate = session.VideoRefreshRate,
-				RunnerRenderNode = RenderNode,
-				WaylandRenderNode = RenderNode,
-				VideoProducerBufferCaps = System.Environment.GetEnvironmentVariable("WOLF_VIDEO_BUFFER_CAPS") ?? ""
-			},
-			AudioSettings = new AudioSettings
-			{
-				ChannelCount = session.AudioChannelCount
-			},
-			ClientSettings = session.ClientSettings
-		};
 
 		if (await QuestionDialogue.OpenDialogue("Pin", "Add Pin to Lobby?",
 			new Dictionary<string, bool> {

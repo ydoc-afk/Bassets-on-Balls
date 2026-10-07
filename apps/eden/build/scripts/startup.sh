@@ -42,6 +42,15 @@ for file in /opt/gow/startup.d/* ; do
     fi
 done
 
+# Eden shows a "Wayland Detected! ... use X11 instead" dialog on every Wayland start. Heeler has no XWayland, so X11 is
+# not an option and the warning is just noise for end users. Pre-seed Eden's own "Don't show again" setting, only on
+# a first start (no config yet) so a user's later changes are never overwritten.
+EDEN_CFG="$HOME/.config/eden/qt-config.ini"
+if [ ! -f "$EDEN_CFG" ]; then
+    mkdir -p "$(dirname "$EDEN_CFG")"
+    printf '[UI]\ngui_hide_backend_warning\\default=false\ngui_hide_backend_warning=true\n' > "$EDEN_CFG" || true
+fi
+
 gow_log "[start] Starting Eden"
 
 # Heeler's compositor has no XWayland. Without this Qt prefers its xcb backend (DISPLAY is set),

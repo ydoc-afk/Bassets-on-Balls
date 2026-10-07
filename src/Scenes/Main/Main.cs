@@ -50,6 +50,9 @@ public partial class Main : Control
 		AddChild(new EffectsGovernor());
 		_ = Effects.ConsiderStreamAsync();
 
+		if (Xmb.Enabled)
+			UseXmb();
+
 		SelfUpdateAsync();
 
 		Logger.LogInformation("This session's id: {0}", WolfApi.SessionId);
@@ -87,6 +90,21 @@ public partial class Main : Control
 	}
 	*/
 	
+	// WOLF_UI_LAYOUT=xmb: the cross menu replaces the classic header / grid / footer. The dialogs and PIN pad stay
+	// shared, so it goes below the popup layer.
+	private void UseXmb()
+	{
+		var content = GetNode<Control>("Content");
+		content.Hide();
+		content.ProcessMode = ProcessModeEnum.Disabled;
+		GetNode<Control>("Panel").Hide();
+
+		var xmb = new Xmb();
+		xmb.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+		AddChild(xmb);
+		MoveChild(xmb, content.GetIndex() + 1);
+	}
+
 	public override void _Input(InputEvent @event)
 	{
 		controllerMap?.SetController(@event);

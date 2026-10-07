@@ -4,7 +4,7 @@ using Godot;
 
 namespace WolfUI;
 
-// Dev helper: BASSETS_SHOT=/path.png [BASSETS_SCREEN=users|apps|menu|dialog|pin] [BASSETS_SHOT_DELAY=seconds]
+// Dev helper: BASSETS_SHOT=/path.png [BASSETS_SCREEN=users|apps|menu|dialog|pin|xmb|xmb-games|xmb-options|xmb-settings|xmb-coop] [BASSETS_SHOT_DELAY=seconds]
 // saves a screenshot after the given delay and quits.
 public static class Preview
 {
@@ -42,6 +42,9 @@ public static class Preview
 		var screen = System.Environment.GetEnvironmentVariable("BASSETS_SCREEN") ?? "users";
 		var delay = double.TryParse(System.Environment.GetEnvironmentVariable("BASSETS_SHOT_DELAY"), out var d) ? d : 3.0;
 		var tree = main.GetTree();
+
+		if (screen.StartsWith("xmb"))
+			tree.CreateTimer(delay * 0.5).Timeout += () => Xmb.Instance?.Preview(screen);
 
 		if (screen is "apps" or "menu")
 		{

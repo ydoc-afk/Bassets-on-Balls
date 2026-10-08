@@ -37,8 +37,6 @@ function launcher() {
       echo "for_window [app_id=\".*\"] fullscreen enable"
       echo "default_border none"
       echo -n "workspace main; exec /opt/gow/start-plasma.sh"
-      # When the Plasma session ends, take Sway (and so the container) down with it
-      if [ "$SWAY_STOP_ON_APP_EXIT" == "yes" ]; then echo -n "; killall sway"; fi
       echo
     } >> $HOME/.config/sway/config
 

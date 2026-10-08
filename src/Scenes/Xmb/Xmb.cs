@@ -402,8 +402,21 @@ public partial class Xmb : Control
 			Toast("That lobby is full");
 	}
 
-	private static async Task<bool> ConfirmClose(string text) =>
-		await QuestionDialogue.OpenDialogue("Close", text, new Dictionary<string, bool> { { "Close", true }, { "Keep running", false } });
+	// While the dialogue is up the menu must not reclaim focus, or a controller can never reach its buttons
+	private bool _confirming;
+
+	private async Task<bool> ConfirmClose(string text)
+	{
+		_confirming = true;
+		try
+		{
+			return await QuestionDialogue.OpenDialogue("Close", text, new Dictionary<string, bool> { { "Close", true }, { "Keep running", false } });
+		}
+		finally
+		{
+			_confirming = false;
+		}
+	}
 
 	private async Task Stop(Item item)
 	{
@@ -733,7 +746,7 @@ public partial class Xmb : Control
 		}
 	}
 
-	private bool Blocked => _popups.Visible;
+	private bool Blocked => _popups.Visible || _confirming;
 
 	public override void _GuiInput(InputEvent e)
 	{

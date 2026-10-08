@@ -35,4 +35,8 @@ fi
 
 # KWin runs as a Wayland client of the compositor it is started in (it picks that backend because WAYLAND_DISPLAY is
 # set) and starts its own Xwayland for X11 apps.
-exec dbus-run-session -- startplasma-wayland
+dbus-run-session -- startplasma-wayland
+
+# Logging out ends the session; take Sway, and so the container, down with it. (A "; killall sway" on the Sway config
+# line doesn't work: Sway reads the semicolon as a command separator.)
+if [ "${SWAY_STOP_ON_APP_EXIT:-yes}" = "yes" ] && [ -n "$SWAYSOCK" ]; then swaymsg exit; fi

@@ -32,5 +32,5 @@ function launcher() {
 
   #
   # Start the Plasma Wayland session
-  exec dbus-run-session -- plasmawayland
+  exec dbus-run-session -- startplasma-wayland
 }

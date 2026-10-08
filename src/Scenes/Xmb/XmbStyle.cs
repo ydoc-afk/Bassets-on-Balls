@@ -17,6 +17,7 @@ public static class XmbStyle
 		new("Ember", new(new Color(1.0f, 0.45f, 0.15f), new Color(1.0f, 0.2f, 0.35f))),
 		new("Orchid", new(new Color(0.75f, 0.35f, 1.0f), new Color(1.0f, 0.45f, 0.75f))),
 		new("Jade", new(new Color(0.1f, 0.8f, 0.5f), new Color(0.75f, 0.95f, 0.3f))),
+		new("Crimson", new(new Color(1.0f, 0.1f, 0.16f), new Color(1.0f, 0.95f, 0.93f))),
 		new("Graphite", new(new Color(0.62f, 0.68f, 0.8f), new Color(0.35f, 0.4f, 0.55f)))
 	];
 

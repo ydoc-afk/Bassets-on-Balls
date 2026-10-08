@@ -613,12 +613,17 @@ public partial class Xmb : Control
 		LayoutOptions();
 
 		_backdrop.SetPalette(Palette, instant);
+		_backdrop.SetNav(_cat + (_cats[_cat].Items.Count > 0 ? _cats[_cat].Selected * 0.35f : 0f), instant);
 		_settled = false;
 		UpdateStatus();
 	}
 
 	public override void _Process(double delta)
 	{
+		// Something else (the hidden classic UI, a closed dialog) can hold keyboard focus on first load, and then
+		// the d-pad does nothing until a click moves it back
+		if (!Blocked && !HasFocus() && !_options.Visible)
+			GrabFocus();
 		PollStick(delta);
 		if (_settled) return;
 		var k = 1f - Mathf.Exp(-(float)delta * 14f);

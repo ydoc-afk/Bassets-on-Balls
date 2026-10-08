@@ -30,9 +30,9 @@ public partial class ControllerMap : Resource
         get => _controller;
         set
         {
-            if (value != _controller)
-                EmitSignalUsedControllerChanged(value);
-            _controller = value;
+            if (value == _controller) return;
+            _controller = value; // store first: handlers read Controller
+            EmitSignalUsedControllerChanged(value);
         }
     }
     public ControllerType Controller => UsedController;
@@ -104,11 +104,17 @@ public partial class ControllerMap : Resource
         var oldController = UsedController;
         switch (@event)
         {
+            // A trackpad (Steam Deck) or a stick-as-mouse moves the pointer all the time; with a pad connected that
+            // must not flip the glyphs to the keyboard. Clicks and keys still do.
+            case InputEventMouseMotion when Input.GetConnectedJoypads().Count > 0:
+                return;
             case InputEventMouseMotion or InputEventMouseButton or InputEventKey:
             {
                 UsedController = ControllerType.None;
                 break;
             }
+            case InputEventJoypadMotion { AxisValue: < 0.5f and > -0.5f }:
+                return; // drift, not a press
             case InputEventJoypadButton or InputEventJoypadMotion:
             {
                 var connectedController = Input.GetConnectedJoypads();

@@ -62,7 +62,7 @@ RUN \
 
 #
 # Replace launch scripts
-COPY --chmod=777 scripts/launch-comp.sh scripts/startup.sh /opt/gow/
+COPY --chmod=777 scripts/launch-comp.sh scripts/startup.sh scripts/start-plasma.sh /opt/gow/
 COPY --chmod=777 scripts/startdbus.sh /opt/gow/startdbus
 
 #

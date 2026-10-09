@@ -25,6 +25,8 @@ PROFILES = [
     {"id": "p1", "name": "Cody", "apps": apps()},
     {"id": "p2", "name": "Guest", "apps": apps()[:6]},
 ]
+if os.environ.get("MOCK_NO_PROFILES"):  # a fresh install: no accounts yet
+    PROFILES = []
 
 
 def poster(i, w=400, h=600):
@@ -112,8 +114,11 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         n = int(self.headers.get("Content-Length", 0))
-        if n:
-            self.rfile.read(n)
+        body = self.rfile.read(n) if n else b""
+        if urlparse(self.path).path.endswith("/profiles/add"):
+            profile = json.loads(body)
+            profile["apps"] = apps()
+            PROFILES.append(profile)
         self._send(200, {"success": True, "lobby_id": "mock-lobby"})
 
 

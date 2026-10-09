@@ -166,21 +166,79 @@ public partial class Xmb : Control
 		}).ToList();
 		foreach (var item in items)
 			item.Activate = () => SelectProfile(item);
-		SetItems(_cats[ProfilesCat], items);
+
+		// Nobody has an account yet: this is a fresh install, so the first thing to do is make one
+		var firstRun = items.Count == 0;
+		var shown = items.ToList();
+		shown.Add(new Item
+		{
+			Title = firstRun ? "Create the first account" : "Add account",
+			Subtitle = firstRun ? "It becomes the administrator" : "",
+			Glyph = XmbGlyph.Profile,
+			Texture = GD.Load<Texture2D>("res://Icons/default_profile_icon.png"),
+			Activate = () => CreateAccount(firstRun)
+		});
+		SetItems(_cats[ProfilesCat], shown);
 		Layout(false);
 
 		foreach (var item in items.Where(i => !string.IsNullOrEmpty(i.Profile!.IconPngPath)))
 			SetTexture(item, await WolfApi.GetIcon(item.Profile!.IconPngPath!));
+
+		if (firstRun)
+		{
+			await CreateAccount(true);
+			return;
+		}
 
 		// One profile without a PIN: nothing to choose, go straight to the games
 		if (items.Count == 1 && items[0].Profile!.Pin is null)
 			await SelectProfile(items[0], quiet: true);
 	}
 
-	private async Task SelectProfile(Item item, bool quiet = false)
+	private async Task CreateAccount(bool first)
+	{
+		_modal = true;
+		string? name;
+		List<int>? pin = null;
+		try
+		{
+			name = await NameInput.Request(first ? "Create the first account" : "Add account",
+				first ? "This account will manage Heeler. Pick a name." : "Pick a name for the new account.",
+				allowCancel: !first);
+			if (name is null) return;
+
+			var wantsPin = await QuestionDialogue.OpenDialogue("PIN",
+				first ? "Protect this account with a PIN?" : $"Protect {name} with a PIN?",
+				new Dictionary<string, bool> { { "Set a PIN", true }, { "No PIN", false } });
+			if (wantsPin)
+			{
+				var entered = await PinInput.RequestPin();
+				if (entered.Count > 0) pin = entered;
+			}
+		}
+		finally
+		{
+			_modal = false;
+		}
+
+		var id = $"{new string(name.ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray())}-{Guid.NewGuid().ToString("N")[..6]}";
+		if (!await WolfApi.AddProfile(id, name, pin))
+		{
+			Toast("Couldn't create the account");
+			// A first run that failed would otherwise leave nothing on screen to retry with
+			return;
+		}
+
+		_sounds.Accept();
+		await LoadProfiles();
+		if (_cats[ProfilesCat].Items.FirstOrDefault(i => i.Profile?.Id == id) is { } created)
+			await SelectProfile(created, quiet: true, trusted: true);
+	}
+
+	private async Task SelectProfile(Item item, bool quiet = false, bool trusted = false)
 	{
 		var profile = item.Profile!;
-		if (profile.Pin is not null)
+		if (profile.Pin is not null && !trusted)
 		{
 			var pin = await PinInput.RequestPin();
 			if (!pin.SequenceEqual(profile.Pin))
@@ -192,7 +250,7 @@ public partial class Xmb : Control
 		}
 
 		WolfApi.ActiveProfile = profile;
-		foreach (var p in _cats[ProfilesCat].Items)
+		foreach (var p in _cats[ProfilesCat].Items.Where(i => i.Profile is not null))
 			p.Subtitle = p == item ? "Signed in" : p.Profile!.Pin is not null ? "Locked with a PIN" : "";
 		RefreshItems(_cats[ProfilesCat]);
 		UpdateStatus();
@@ -402,19 +460,19 @@ public partial class Xmb : Control
 			Toast("That lobby is full");
 	}
 
-	// While the dialogue is up the menu must not reclaim focus, or a controller can never reach its buttons
-	private bool _confirming;
+	// While a dialogue is up the menu must not reclaim focus, or a controller can never reach its buttons
+	private bool _modal;
 
 	private async Task<bool> ConfirmClose(string text)
 	{
-		_confirming = true;
+		_modal = true;
 		try
 		{
 			return await QuestionDialogue.OpenDialogue("Close", text, new Dictionary<string, bool> { { "Close", true }, { "Keep running", false } });
 		}
 		finally
 		{
-			_confirming = false;
+			_modal = false;
 		}
 	}
 
@@ -746,7 +804,7 @@ public partial class Xmb : Control
 		}
 	}
 
-	private bool Blocked => _popups.Visible || _confirming;
+	private bool Blocked => _popups.Visible || _modal;
 
 	public override void _GuiInput(InputEvent e)
 	{

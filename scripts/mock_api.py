@@ -75,6 +75,9 @@ class Handler(BaseHTTPRequestHandler):
         p = u.path.removeprefix("/api/v1")
         if p == "/profiles":
             self._send(200, {"success": True, "profiles": PROFILES})
+        elif p == "/admin":
+            self._send(200, {"success": True, "admin_profile_id": PROFILES[0]["id"] if PROFILES else None,
+                             "password_set": True, "setup_required": False})
         elif p == "/apps":
             self._send(200, {"success": True, "apps": apps()})
         elif p == "/lobbies":

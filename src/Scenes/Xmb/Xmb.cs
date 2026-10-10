@@ -169,15 +169,17 @@ public partial class Xmb : Control
 
 		// Nobody has an account yet: this is a fresh install, so the first thing to do is make one
 		var firstRun = items.Count == 0;
+		_adminId = firstRun ? null : await WolfApi.GetAdminProfileId();
 		var shown = items.ToList();
-		shown.Add(new Item
-		{
-			Title = firstRun ? "Create the first account" : "Add account",
-			Subtitle = firstRun ? "It becomes the administrator" : "",
-			Glyph = XmbGlyph.Profile,
-			Texture = GD.Load<Texture2D>("res://Icons/default_profile_icon.png"),
-			Activate = () => CreateAccount(firstRun)
-		});
+		if (firstRun || CanAddAccounts())
+			shown.Add(new Item
+			{
+				Title = firstRun ? "Create the first account" : "Add account",
+				Subtitle = firstRun ? "It becomes the administrator" : "",
+				Glyph = XmbGlyph.Profile,
+				Texture = GD.Load<Texture2D>("res://Icons/default_profile_icon.png"),
+				Activate = () => CreateAccount(firstRun)
+			});
 		SetItems(_cats[ProfilesCat], shown);
 		Layout(false);
 
@@ -193,6 +195,28 @@ public partial class Xmb : Control
 		// One profile without a PIN: nothing to choose, go straight to the games
 		if (items.Count == 1 && items[0].Profile!.Pin is null)
 			await SelectProfile(items[0], quiet: true);
+	}
+
+	// Only the admin adds accounts, and only once signed in (and past their PIN, if they have one)
+	private string? _adminId;
+
+	private bool CanAddAccounts() => _adminId is not null && WolfApi.ActiveProfile?.Id == _adminId;
+
+	// Signing in as someone else must add or drop the Add account item to match
+	private void SyncAddAccountItem()
+	{
+		var cat = _cats[ProfilesCat];
+		var shown = cat.Items.Where(i => i.Profile is not null).ToList();
+		if (shown.Count == 0) return;
+		if (CanAddAccounts())
+			shown.Add(new Item
+			{
+				Title = "Add account",
+				Glyph = XmbGlyph.Profile,
+				Texture = GD.Load<Texture2D>("res://Icons/default_profile_icon.png"),
+				Activate = () => CreateAccount(false)
+			});
+		if (shown.Count != cat.Items.Count) SetItems(cat, shown);
 	}
 
 	private async Task CreateAccount(bool first)
@@ -250,6 +274,7 @@ public partial class Xmb : Control
 		}
 
 		WolfApi.ActiveProfile = profile;
+		SyncAddAccountItem();
 		foreach (var p in _cats[ProfilesCat].Items.Where(i => i.Profile is not null))
 			p.Subtitle = p == item ? "Signed in" : p.Profile!.Pin is not null ? "Locked with a PIN" : "";
 		RefreshItems(_cats[ProfilesCat]);

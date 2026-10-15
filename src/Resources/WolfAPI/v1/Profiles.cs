@@ -16,6 +16,13 @@ public partial class WolfApi
         return [];
     }
 
+    // The account that manages Heeler, or null when none exists yet or Heeler can't say
+    public static async Task<string?> GetAdminProfileId()
+    {
+        var status = await GetAsync<AdminStatusResponse>($"{Api}/admin");
+        return status is { Success: true } ? status.AdminProfileId : null;
+    }
+
     // Creates an account. With no apps given, Heeler starts it with the default set.
     public static async Task<bool> AddProfile(string id, string name, List<int>? pin)
     {

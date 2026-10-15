@@ -15,6 +15,18 @@ namespace Resources.WolfAPI
     }
 }
 
+namespace Resources.WolfAPI
+{
+    public class AdminStatusResponse
+    {
+        [JsonInclude, JsonPropertyName("success")]
+        public bool Success { get; set; }
+
+        [JsonInclude, JsonPropertyName("admin_profile_id")]
+        public string? AdminProfileId { get; set; }
+    }
+}
+
 namespace WolfUI
 {
     public partial class Profile
